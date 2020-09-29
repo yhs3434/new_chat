@@ -2,6 +2,7 @@
 
 const wsLib = require('./lib/websocket');
 const decodeFromJs = wsLib.decodeFromJs;
+const encodeToJs = wsLib.encodeToJs;
 
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({port:8081});
@@ -44,6 +45,19 @@ wss.on('connection', (ws) => {
         } else if (type === 'message') {
             const {msg} = payload;
             console.log(`message : ${msg}`);
+        } else if (type === 'connecting') {
+            const users = new Array();
+
+            for (const entry of user_ws.entries()) {
+                users.push(entry[0]);
+            }
+            const data = {
+                type: 'connecting',
+                payload: {
+                    users: JSON.stringify(users)
+                }
+            };
+            ws.send(encodeToJs(data));
         }
     });
 

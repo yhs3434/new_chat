@@ -3,17 +3,32 @@
     <head>
         <title>채팅 클라</title>
         <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="./client/main.css">
     </head>
     <body>
         <h1>채팅 클라이언트</h1>
-        <spam>client id : </spam>
-        <input id="inputClientId" type="text" readonly/> 
         <div>
-            <input id="inputMessage" type="text"/>
-            <button id="btnSend">전송</button>
+            <span id="test">client id : </span>
+            <input id="inputClientId" type="text" readonly/> 
+            <div>
+                <input id="inputMessage" type="text"/>
+                <button id="btnSend">전송</button>
+            </div>
         </div>
-        
+        <div>
+            <h3>접속 중인 클라이언트</h3>
+            <ul id="ulClient">
+                
+            </ul>
+        </div>
+        <div>
+            <h3>채팅</h3>
+            <ul id="ulChat">
+
+            </ul>
+        </div>
         <script src="./client/clientId.js"></script>
         <script async=false src="./client/sendMessage.js"></script>
+        <script src="./client/connectingClient.js"></script>
     </body>
 </html>
