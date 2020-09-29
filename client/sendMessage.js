@@ -8,15 +8,30 @@ const host = "localhost";
 const port = 8081;
 const hostPort = `ws://${host}:${port}`;
 
+
 console.log(hostPort);
 
 const ws = new WebSocket(hostPort);
-ws.onopen = (evt) => {
+ws.onopen = (event) => {
+    const clientId = document.getElementById('inputClientId').value;
     ws.send(encodeToJs(
         {
-            type: 'start',
+            type: 'open',
             payload: {
-                message: 'test'
+                clientId
+            }
+        }
+    ));
+}
+
+ws.onclose = (event) => {
+    const clientId = document.getElementById('inputClientId').value;
+    console.log('ccc');
+    ws.send(encodeToJs(
+        {
+            type: 'close',
+            payload: {
+                clientId
             }
         }
     ));

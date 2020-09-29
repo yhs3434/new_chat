@@ -6,41 +6,43 @@ const decodeFromJs = wsLib.decodeFromJs;
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({port:8081});
 
-let users = new Map();
+const user_ws = new Map();
+// user_ws 는 유저의 클라이언트 아이디와 ws 객체를 연결
+const group_user = new Map();
+// group_user 는 그룹에 어떤 유저들이 속해있는지 연결
 
 wss.on('connection', (ws) => {
     //console.log(ws);
     ws.on('message', (req) => {
-        const message = decodeFromJs(req);
-        // console.log(`received : ${message}`);
-        const {type, payload} = message;
-        if (type === 'init') {
+        const {type, payload} = decodeFromJs(req);
+        if (type === 'open') {
             const {clientId} = payload;
             console.log(`${clientId} is connected`);
+            user_ws.set(clientId, ws);
+            
+            user_ws.forEach(logMapElements);
 
-            const payload = {
-                clientId : clientId,
-                groupId : users[clientId]
-            };
-            const res = {
-                type : 'init',
-                payload : payload
-            };
-            ws.send(res);
+        } else if (type === 'close') {
+            const {clientId} = payload;
+            console.log(`${clientId} is closed`);
+            user_ws.delete(clientId);
         } else if (type === 'join') {
             const {clientId, groupId} = payload;
 
-            if (typeof(users[clientId]) === 'undefined') {
-                users[clientId] = new Array();
+            if (!group_user.has(groupId)) {
+                group_user.set(groupId, new Array());
             }
-            users[clientId].push(groupId);
-            
+            group_user.get(groupId).push(clientId);
+
         } else if (type === 'withdraw') {
             const {clientId, groupId} = payload;
 
-            const idx = users[clientId].indexOf(groupId);
+            const idx = group_user.get(groupId).indexOf(clientId);
             if (idx > -1) {
-                users[clientId].splice(idx, 1);
+                group_user.get(groupId).splice(idx, 1);
+            }
+            if (group_user.get(groupId).length === 0) {
+                group_user.delete(groupId);
             }
         } else if (type === 'message') {
             const {msg} = payload;
@@ -48,5 +50,11 @@ wss.on('connection', (ws) => {
         }
     });
 
-    ws.send('something');
+    ws.on('close', (event) => {
+        // 여기해야됨
+    })
 })
+
+function logMapElements(value, key, map) {
+    console.log(`${key} : ${value.url}`);
+}
