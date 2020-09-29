@@ -19,13 +19,10 @@ wss.on('connection', (ws) => {
             const {clientId} = payload;
             console.log(`${clientId} is connected`);
             user_ws.set(clientId, ws);
-            
+            ws.clientId = clientId;
+
             user_ws.forEach(logMapElements);
 
-        } else if (type === 'close') {
-            const {clientId} = payload;
-            console.log(`${clientId} is closed`);
-            user_ws.delete(clientId);
         } else if (type === 'join') {
             const {clientId, groupId} = payload;
 
@@ -51,10 +48,10 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('close', (event) => {
-        // 여기해야됨
+        user_ws.delete(ws.clientId);
     })
 })
 
 function logMapElements(value, key, map) {
-    console.log(`${key} : ${value.url}`);
+    console.log(`${key} : ${value.clientId}`);
 }

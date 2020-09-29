@@ -26,15 +26,7 @@ ws.onopen = (event) => {
 
 ws.onclose = (event) => {
     const clientId = document.getElementById('inputClientId').value;
-    console.log('ccc');
-    ws.send(encodeToJs(
-        {
-            type: 'close',
-            payload: {
-                clientId
-            }
-        }
-    ));
+    console.log(`${clientId} is closed`);
 }
 
 function buttonClick() {
