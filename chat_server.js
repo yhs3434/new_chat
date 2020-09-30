@@ -14,8 +14,9 @@ const group_user = new Map();
 
 wss.on('connection', (ws) => {
     //console.log(ws);
-    ws.on('message', (req) => {
-        const {type, payload} = decodeFromJs(req);
+    ws.on('message', (frame) => {
+        const {type, payload} = decodeFromJs(frame);
+
         if (type === 'open') {
             const {clientId} = payload;
             console.log(`${clientId} is connected`);
@@ -57,7 +58,32 @@ wss.on('connection', (ws) => {
                     users: JSON.stringify(users)
                 }
             };
-            ws.send(encodeToJs(data));
+            wss.clients.forEach((client) => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(encodeToJs(data));
+                }
+            })
+        } else if (type === 'ws') {
+            const {clientId} = payload;
+            if (user_ws.has(clientId.toString())) {
+                const obj = user_ws.get(clientId.toString());
+                const data = {
+                    type : "ws",
+                    payload : {
+                        ws : obj
+                    }
+                };
+                ws.send(encodeToJs(data));
+            } else {
+                const data = {
+                    type : "ws",
+                    payload : {
+                        ws : null
+                    }
+                };
+                ws.send(encodeToJs(data));
+            }
+            
         }
     });
 

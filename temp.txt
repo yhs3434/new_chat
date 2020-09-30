@@ -1,0 +1,6 @@
+const temp = {
+    type : "ws",
+    payload : {
+        clientId : 47604
+    }
+}

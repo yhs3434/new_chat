@@ -54,12 +54,31 @@ ws.onmessage = (event) => {
 
     if (type === "connecting") {
         const users = JSON.parse(payload.users);
-        console.log('users', users);
         const ulClient = document.getElementById('ulClient');
+        ulClient.innerHTML = '';
         for (const user of users) {
             const elem = document.createElement('li');
             elem.innerText = user;
+            const chatBtn = document.createElement('button');
+            chatBtn.innerText = "1:1 채팅";
+            chatBtn.onclick = (event) => {
+                const data = {
+                    type : "ws",
+                    payload : {
+                        clientId : user
+                    }
+                };
+                ws.send(encodeToJs(data));
+            }
+            elem.appendChild(chatBtn);
             ulClient.appendChild(elem);
+        }
+    } else if (type === "ws") {
+        const obj = payload.ws;
+        if (obj === null) {
+            console.log("There is not a user");
+        } else {
+            console.log(obj);
         }
     }
     
