@@ -14,18 +14,32 @@ const group_user = new Map();
 
 wss.on('connection', (ws) => {
     //console.log(ws);
+    
+    const clientId = ws.protocol;
+    console.log(`${clientId} is connected`);
+    user_ws.set(clientId, ws);
+    user_ws.forEach(logMapElements);
+
+    const users = new Array();
+    for (const entry of user_ws.entries()) {
+        users.push(entry[0]);
+    }
+    const connectingUsers = {
+        type: 'connecting',
+        payload: {
+            users: JSON.stringify(users)
+        }
+    };
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(encodeToJs(connectingUsers));
+        }
+    })
+
     ws.on('message', (frame) => {
         const {type, payload} = decodeFromJs(frame);
 
-        if (type === 'open') {
-            const {clientId} = payload;
-            console.log(`${clientId} is connected`);
-            user_ws.set(clientId, ws);
-            ws.clientId = clientId;
-
-            user_ws.forEach(logMapElements);
-
-        } else if (type === 'join') {
+        if (type === 'join') {
             const {clientId, groupId} = payload;
 
             if (!group_user.has(groupId)) {
@@ -58,11 +72,6 @@ wss.on('connection', (ws) => {
                     users: JSON.stringify(users)
                 }
             };
-            wss.clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(encodeToJs(data));
-                }
-            })
         } else if (type === 'ws') {
             const {clientId} = payload;
             if (user_ws.has(clientId.toString())) {
@@ -88,10 +97,27 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('close', (event) => {
-        user_ws.delete(ws.clientId);
+        user_ws.delete(ws.protocol);
+
+        const users = new Array();
+        for (const entry of user_ws.entries()) {
+            users.push(entry[0]);
+        }
+        const connectingUsers = {
+            type: 'connecting',
+            payload: {
+                users: JSON.stringify(users)
+            }
+        };
+        wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+                
+                client.send(encodeToJs(connectingUsers));
+            }
+        })
     })
 })
 
 function logMapElements(value, key, map) {
-    console.log(`${key} : ${value.clientId}`);
+    console.log(`${key} : ${value.protocol}`);
 }
