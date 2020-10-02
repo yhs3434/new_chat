@@ -87,6 +87,12 @@ window.onload = () => {
                 Object.setPrototypeOf(obj, Object.getPrototypeOf(ws));
                 obj.send('test');
             }
+        } else if (type === "chat") {
+            const {clientId, groupId, content} = payload;
+            const parent = document.getElementById("ulChat");
+            const child = document.createElement("li");
+            child.innerText = `${clientId} : ${content}`;
+            parent.appendChild(child);
         }
         
     }
@@ -102,9 +108,11 @@ window.onload = () => {
         const value = elem.value;
         elem.value = '';
         const data = {
-            type: 'message',
+            type: 'chat',
             payload: {
-                msg: value
+                clientId,
+                groupId : 0,
+                content : value
             }
         };
         ws.send(encodeToJs(data));

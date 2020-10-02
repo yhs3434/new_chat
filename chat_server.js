@@ -93,6 +93,10 @@ wss.on('connection', (ws) => {
                 ws.send(encodeToJs(data));
             }
             
+        } else if (type === "chat") {
+            const {clientId, groupId, content} = payload;
+            console.log(clientId, groupId, content);
+            // 이 부분 이어서 할 것
         }
     });
 
