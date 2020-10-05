@@ -11,6 +11,8 @@ const user_ws = new Map();
 // user_ws 는 유저의 클라이언트 아이디와 ws 객체를 연결
 const group_user = new Map();
 // group_user 는 그룹에 어떤 유저들이 속해있는지 연결
+const user_group = new Map();
+// user_group 은 유저가 어떤 그룹에 속해있는지 확인.
 
 wss.on('connection', (ws) => {
     //console.log(ws);
@@ -46,7 +48,8 @@ wss.on('connection', (ws) => {
                 group_user.set(groupId, new Array());
             }
             group_user.get(groupId).push(clientId);
-
+            console.log(group_user); // 임시
+            
         } else if (type === 'withdraw') {
             const {clientId, groupId} = payload;
 
@@ -97,6 +100,23 @@ wss.on('connection', (ws) => {
             const {clientId, groupId, content} = payload;
             console.log(clientId, groupId, content);
             // 이 부분 이어서 할 것
+            const data = {
+                type: "chat",
+                payload: {
+                    clientId,
+                    groupId,
+                    content
+                }
+            };
+            if (group_user.has(groupId)) {
+                const users = group_user.get(groupId);
+                for (const user of users) {
+                    user.send(encodeToJs(data));
+                }
+            } else {
+                console.log(`There is no group. ${groupId}`);
+            }
+            
         }
     });
 

@@ -7,6 +7,12 @@ function decodeFromJs(message) {
     return JSON.parse(unescape(message));
 }
 
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
+}
+
 window.onload = () => {
     const host = "localhost";
     const port = 8081;
@@ -66,14 +72,40 @@ window.onload = () => {
                 elem.innerText = user;
                 const chatBtn = document.createElement('button');
                 chatBtn.innerText = "1:1 채팅";
-                chatBtn.onclick = (event) => {
-                    const data = {
-                        type : "ws",
-                        payload : {
-                            clientId : user
-                        }
+                if (user === clientId) {
+                    chatBtn.style.backgroundColor = 'red';
+                } else {
+                    /*
+                    chatBtn.onclick = (event) => {
+                        const data = {
+                            type : "ws",
+                            payload : {
+                                clientId : user
+                            }
+                        };
+                        ws.send(encodeToJs(data));
+                    }
+                    */
+                    chatBtn.onclick = (event) => {
+                        const groupId = "g" + getRandomInt(10000, 100000);
+                        window.sessionStorage.setItem(groupId, "chatroom");
+                        const data = {
+                            type: "join",
+                            payload: {
+                                clientId: user,
+                                groupId: groupId
+                            }
+                        };
+                        const data2 = {
+                            type: "join",
+                            payload: {
+                                clientId: clientId,
+                                groupId: groupId 
+                            }
+                        };
+                        ws.send(encodeToJs(data));
+                        ws.send(encodeToJs(data2));
                     };
-                    ws.send(encodeToJs(data));
                 }
                 elem.appendChild(chatBtn);
                 ulClient.appendChild(elem);
@@ -106,12 +138,13 @@ window.onload = () => {
     function buttonClick() {
         const elem = document.getElementById('inputMessage');
         const value = elem.value;
+        const groupId = document.getElementById("inputGroupId").value;
         elem.value = '';
         const data = {
             type: 'chat',
             payload: {
                 clientId,
-                groupId : 0,
+                groupId,
                 content : value
             }
         };
