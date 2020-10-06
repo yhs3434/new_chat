@@ -88,7 +88,54 @@ window.onload = () => {
                     */
                     chatBtn.onclick = (event) => {
                         const groupId = "g" + getRandomInt(10000, 100000);
-                        window.sessionStorage.setItem(groupId, "chatroom");
+                        
+                        if (!window.indexedDB) {
+                            window.alert("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.")
+                        } else {
+                            let db;
+                            let request = window.indexedDB.open("hansolChat");
+                            request.onerror = (event) => {
+
+                            };
+                            request.onsuccess = (event) => {
+                                db = request.result;
+                                
+                                const transaction = db.transaction(["chatroom"], "readwrite");
+                                const objectStore = transaction.objectStore("chatroom");
+                                const data = {
+                                    groupId
+                                };
+                                objectStore.add(data);
+                                console.log('tt');
+                                const parent = document.getElementById("ulChatRoomList");
+                                const requestGetAll = objectStore.getAll();
+                                requestGetAll.onsuccess = (event) => {
+                                    const dataAll = requestGetAll.result;
+                                    parent.innerHTML = "";
+                                    for (const d of dataAll) {
+                                        const child = document.createElement("li");
+                                        child.innerHTML = "<span>" + d.groupId + "</span>";
+                                        //child.innerHTML += "<button>chat</button>"
+                                        child.onclick = (event) => {
+                                            document.getElementById("inputGroupId").value = d.groupId;
+                                        }
+                                        parent.appendChild(child);
+                                        
+                                    }
+                                    // console.log('dataAll', dataAll);
+                                }
+
+                                
+                            }
+                            request.onupgradeneeded = function(event) { 
+                                // Save the IDBDatabase interface 
+                                db = event.target.result;
+                                
+                                // Create an objectStore for this database
+                                var objectStore = db.createObjectStore("chatroom", { keyPath: "groupId" });
+                            };
+                        }
+
                         const data = {
                             type: "join",
                             payload: {
