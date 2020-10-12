@@ -106,7 +106,6 @@ window.onload = () => {
                                     groupId
                                 };
                                 objectStore.add(data);
-                                console.log('tt');
                                 const parent = document.getElementById("ulChatRoomList");
                                 const requestGetAll = objectStore.getAll();
                                 requestGetAll.onsuccess = (event) => {
@@ -132,7 +131,7 @@ window.onload = () => {
                                 db = event.target.result;
                                 
                                 // Create an objectStore for this database
-                                var objectStore = db.createObjectStore("chatroom", { keyPath: "groupId" });
+                                var objectStore = db.createObjectStore("chatroom", { keyPath: "groupId", autoIncrement: true });
                             };
                         }
 
@@ -168,6 +167,31 @@ window.onload = () => {
             }
         } else if (type === "chat") {
             const {clientId, groupId, content} = payload;
+            /*
+            if (!window.indexedDB) {
+                window.alert("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.")
+            } else {
+                let db;
+                let request = window.indexedDB.open("hansolChat", 2);
+                request.onerror = (event) => {
+                    console.log('error', event);
+                }
+                request.onsuccess = (event) => {
+                    db = request.result;
+                    const objectStore = db.transaction(["chat"], "readwrite").objectStore("chat");
+                    
+                    const data = {
+                        groupId, clientId, content
+                    };
+                    objectStore.add(data);
+                }
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    const objectStore = db.createObjectStore("chat");
+                }
+            }
+            */
+
             const parent = document.getElementById("ulChat");
             const child = document.createElement("li");
             child.innerText = `${clientId} : ${content}`;

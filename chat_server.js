@@ -111,7 +111,8 @@ wss.on('connection', (ws) => {
             if (group_user.has(groupId)) {
                 const users = group_user.get(groupId);
                 for (const user of users) {
-                    user.send(encodeToJs(data));
+                    const realUser = user_ws.get(user);
+                    realUser.send(encodeToJs(data));
                 }
             } else {
                 console.log(`There is no group. ${groupId}`);
